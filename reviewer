@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Optimizer - AI-Powered Resume Feedback</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f7f9;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            color: #7f8c8d;
+            font-size: 1.1em;
+        }
+
+        .upload-section {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        input[type="file"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        .secondary-btn {
+            background-color: #95a5a6;
+        }
+
+        .secondary-btn:hover {
+            background-color: #7f8c8d;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .results h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .feedback-content {
+            white-space: pre-line;
+            line-height: 1.8;
+        }
+
+        .feedback-content h3 {
+            color: #2c3e50;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .feedback-content ul {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        .error {
+            background: #ffebee;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .error h2 {
+            color: #c0392b;
+            margin-bottom: 15px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .upload-section, .loading, .results, .error {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Resume Optimizer</h1>
+            <p>Upload your resume and job description to get AI-powered feedback and optimization suggestions</p>
+        </header>
+
+        <div class="upload-section">
+            <form id="resumeForm" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="resume">Upload Your Resume (PDF or DOCX):</label>
+                    <input type="file" id="resume" name="resume" accept=".pdf,.docx,.doc" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="industry">Industry/Role Type:</label>
+                    <select id="industry" name="industry">
+                        <option value="General">General</option>
+                        <option value="Technology">Technology</option>
+                        <option value="Healthcare">Healthcare</option>
+                        <option value="Finance">Finance</option>
+                        <option value="Marketing">Marketing</option>
+                        <option value="Education">Education</option>
+                        <option value="Engineering">Engineering</option>
+                        <option value="Design">Design</option>
+                        <option value="Sales">Sales</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="job_description">Paste Job Description:</label>
+                    <textarea id="job_description" name="job_description" rows="6" placeholder="Copy and paste the job description you're applying for here..." required></textarea>
+                </div>
+
+                <button type="submit" id="analyzeBtn">Analyze Resume</button>
+            </form>
+        </div>
+
+        <div id="loading" class="loading hidden">
+            <div class="spinner"></div>
+            <p>Analyzing your resume... This may take a moment.</p>
+        </div>
+
+        <div id="results" class="results hidden">
+            <h2>Feedback Report</h2>
+            <div id="feedbackContent" class="feedback-content"></div>
+            <button id="newAnalysis" class="secondary-btn">Analyze Another Resume</button>
+        </div>
+
+        <div id="error" class="error hidden">
+            <h2>Error</h2>
+            <p id="errorMessage"></p>
+            <button id="tryAgain" class="secondary-btn">Try Again</button>
+        </div>
+    </div>
+
+    <footer>
+        <p>Resume Optimizer uses AI to help improve your job application materials. We don't store your resume or personal data.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('resumeForm');
+            const loadingSection = document.getElementById('loading');
+            const resultsSection = document.getElementById('results');
+            const errorSection = document.getElementById('error');
+            const errorMessage = document.getElementById('errorMessage');
+            const feedbackContent = document.getElementById('feedbackContent');
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            const newAnalysisBtn = document.getElementById('newAnalysis');
+            const tryAgainBtn = document.getElementById('tryAgain');
+            
+            // Mock analysis function for demonstration
+            function mockAnalyzeResume(resumeFile, jobDescription, industry) {
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        // This is a mock response since we can't connect to a real backend
+                        const mockFeedback = `
+1. STRENGTHS: 
+   - Strong educational background in Computer Science
+   - Relevant internship experience in software development
+   - Good technical skills listing
+
+2. AREAS FOR IMPROVEMENT: 
+   - Resume lacks quantifiable achievements
+   - Missing keywords from the job description like "Agile methodology" and "CI/CD"
+   - Work experience section needs more detail about specific contributions
+
+3. KEYWORD OPTIMIZATION: 
+   Add these keywords from the job description: cloud computing, AWS, REST APIs, Scrum, DevOps, Docker, Kubernetes
+
+4. SKILLS GAP ANALYSIS: 
+   The job description mentions experience with cloud platforms (AWS/Azure) which is not highlighted in your resume
+
+5. ACTIONABLE RECOMMENDATIONS: 
+   - Add a professional summary at the top targeting the specific role
+   - Quantify achievements with numbers (e.g., "Improved performance by 20%")
+   - Reorder skills to match the priority in the job description
+   - Add any relevant certifications or courses
+
+6. OVERALL SCORE: 6/10
+                        `;
+                        resolve({ success: true, feedback: mockFeedback });
+                    }, 2000);
+                });
+            }
+            
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const resumeFile = document.getElementById('resume').files[0];
+                const jobDescription = document.getElementById('job_description').value;
+                const industry = document.getElementById('industry').value;
+                
+                if (!resumeFile) {
+                    showError('Please select a resume file to upload.');
+                    return;
+                }
+                
+                if (!jobDescription.trim()) {
+                    showError('Please paste the job description you want to target.');
+                    return;
+                }
+                
+                // Show loading state
+                analyzeBtn.disabled = true;
+                document.querySelector('.upload-section').classList.add('hidden');
+                loadingSection.classList.remove('hidden');
+                resultsSection.classList.add('hidden');
+                errorSection.classList.add('hidden');
+                
+                // For demonstration purposes, we'll use a mock analysis
+                // In a real implementation, you would send this to your backend
+                mockAnalyzeResume(resumeFile, jobDescription, industry)
+                    .then(data => {
+                        if (data.success) {
+                            showResults(data.feedback);
+                        } else {
+                            showError(data.error || 'An error occurred during analysis.');
+                        }
+                    })
+                    .catch(error => {
+                        showError('Error: ' + error.message);
+                    })
+                    .finally(() => {
+                        analyzeBtn.disabled = false;
+                    });
+            });
+            
+            newAnalysisBtn.addEventListener('click', resetForm);
+            tryAgainBtn.addEventListener('click', resetForm);
+            
+            function showResults(feedback) {
+                // Format the feedback with HTML
+                const formattedFeedback = formatFeedback(feedback);
+                feedbackContent.innerHTML = formattedFeedback;
+                
+                loadingSection.classList.add('hidden');
+                resultsSection.classList.remove('hidden');
+            }
+            
+            function showError(message) {
+                errorMessage.textContent = message;
+                
+                loadingSection.classList.add('hidden');
+                document.querySelector('.upload-section').classList.remove('hidden');
+                errorSection.classList.remove('hidden');
+            }
+            
+            function resetForm() {
+                form.reset();
+                resultsSection.classList.add('hidden');
+                errorSection.classList.add('hidden');
+                document.querySelector('.upload-section').classList.remove('hidden');
+            }
+            
+            function formatFeedback(feedback) {
+                // Convert plain text feedback to HTML with basic formatting
+                let html = '';
+                const lines = feedback.split('\n');
+                
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    
+                    if (line.includes(':')) {
+                        const parts = line.split(':');
+                        if (parts.length > 1) {
+                            const title = parts[0].trim();
+                            const content = parts.slice(1).join(':').trim();
+                            
+                            if (title.match(/^\d+\./)) {
+                                // Numbered section
+                                html += `<h3>${title}</h3>`;
+                                if (content) {
+                                    html += `<p>${content}</p>`;
+                                }
+                            } else {
+                                // Bold title with content
+                                html += `<p><strong>${title}:</strong> ${content}</p>`;
+                            }
+                            continue;
+                        }
+                    }
+                    
+                    if (line.startsWith('- ') || line.startsWith('• ')) {
+                        // List item
+                        if (!html.endsWith('<ul>')) {
+                            if (!html.endsWith('</ul>')) {
+                                html += '<ul>';
+                            } else {
+                                html += '<ul>';
+                            }
+                        }
+                        html += `<li>${line.substring(2)}</li>`;
+                    } else if (line === '') {
+                        // Close list if needed
+                        if (html.endsWith('</li>')) {
+                            html += '</ul>';
+                        }
+                        html += '<br>';
+                    } else {
+                        // Regular paragraph
+                        // Close list if needed
+                        if (html.endsWith('</li>')) {
+                            html += '</ul>';
+                        }
+                        html += `<p>${line}</p>`;
+                    }
+                }
+                
+                // Close any open list
+                if (html.endsWith('</li>')) {
+                    html += '</ul>';
+                }
+                
+                return html;
+            }
+        });
+    </script>
+</body>
+</html>
